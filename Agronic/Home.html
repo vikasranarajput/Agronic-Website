@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better content flow */
+            min-height: 100vh; /* Full viewport height */
+            margin: 0;
+            padding: 20px; /* Add some padding for smaller screens */
+            box-sizing: border-box;
+        }
+        /* Custom toggle switch styling */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px; /* Wider for better touch target */
+            height: 28px; /* Taller */
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px; /* Make it rounded */
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; /* Smaller circle */
+            width: 20px; /* Smaller circle */
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%; /* Make it circular */
+        }
+
+        input:checked + .slider {
+            background-color: #28a745; /* Green when checked */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #28a745;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px); /* Move circle to the right */
+        }
+
+        /* Style for the verify button */
+        .verify-button {
+            background-color: #1a202c; /* Dark gray/black */
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+        }
+        .verify-button:hover {
+            background-color: #2d3748; /* Slightly lighter on hover */
+        }
+
+        /* Progress bar styling */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e2e8f0; /* Light gray background for the track */
+            border-radius: 5px;
+            height: 10px; /* Height of the progress bar */
+            overflow: hidden; /* Ensure the filled part stays within bounds */
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3b82f6; /* Blue color for the filled part */
+            width: 0%; /* Initial width, will be set by JS */
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out; /* Smooth transition for width changes */
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md md:max-w-lg lg:max-w-xl">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Motor Control</h1>
+            <a href="index.html" class="text-gray-500 hover:text-gray-700 transition duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H5a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="bg-gray-100 p-6 rounded-lg mb-6 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Motor</h2>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="motorToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <p class="text-gray-600 text-sm">Some details about this motor, How it operates. Lorem ipsum</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-gray-100 p-6 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-800">Valve 1</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="valve1Toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="bg-gray-100 p-6 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-800">Valve 2</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="valve2Toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-right mb-8">
+            <button class="verify-button">Verify</button>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                Sensors Data
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </h2>
+            <div class="bg-gray-100 p-6 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-700 font-medium">Humidity</span>
+                    <span id="humidityValue" class="text-gray-800 font-semibold">65%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="humidityProgressBar" class="progress-bar-fill" style="width: 65%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for updating humidity value and progress bar dynamically
+        const humidityValue = document.getElementById('humidityValue');
+        const humidityProgressBar = document.getElementById('humidityProgressBar');
+
+        // Function to update humidity
+        function updateHumidity() {
+            // Generate a random humidity value between 0 and 100
+            const newHumidity = Math.floor(Math.random() * 101);
+            humidityValue.textContent = newHumidity + '%';
+            humidityProgressBar.style.width = newHumidity + '%';
+        }
+
+        // Update humidity every 2 seconds
+        setInterval(updateHumidity, 2000);
+
+        // Example of how to handle toggle changes (optional)
+        document.getElementById('motorToggle').addEventListener('change', function() {
+            console.log('Motor toggle state:', this.checked);
+        });
+        document.getElementById('valve1Toggle').addEventListener('change', function() {
+            console.log('Valve 1 toggle state:', this.checked);
+        });
+        document.getElementById('valve2Toggle').addEventListener('change', function() {
+            console.log('Valve 2 toggle state:', this.checked);
+        });
+    </script>
+</body>
+</html>
